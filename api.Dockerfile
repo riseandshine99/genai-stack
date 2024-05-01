@@ -1,5 +1,8 @@
 FROM langchain/langchain
 
+# Change Debian mirror to a more reliable one
+RUN sed -i 's/deb.debian.org/ftp.us.debian.org/g' /etc/apt/sources.list
+
 WORKDIR /app
 
 RUN apt-get update && apt-get --allow-unauthenticated install -y \
