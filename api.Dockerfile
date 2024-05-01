@@ -1,24 +1,16 @@
 FROM langchain/langchain
 
-# Change Debian mirror to a more reliable one
-RUN sed -i 's/deb.debian.org/ftp.us.debian.org/g' /etc/apt/sources.list
+# Recreate sources.list if it doesn't exist
+RUN if [ ! -f /etc/apt/sources.list ]; then echo "deb http://ftp.us.debian.org/debian/ stretch main" > /etc/apt/sources.list; fi
 
-WORKDIR /app
-
-RUN apt-get update && apt-get --allow-unauthenticated install -y \
-    build-essential \
-    curl \
-    software-properties-common \
+RUN sed -i 's/deb.debian.org/ftp.us.debian.org/g' /etc/apt/sources.list \
+    && apt-get update \
+    && apt-get install -y build-essential curl software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-
+WORKDIR /app
+COPY . .
 RUN pip install --upgrade -r requirements.txt
 
-COPY api.py .
-COPY utils.py .
-COPY chains.py .
-
 HEALTHCHECK CMD curl --fail http://localhost:8504
-
 ENTRYPOINT [ "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8504" ]
