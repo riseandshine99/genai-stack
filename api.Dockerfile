@@ -1,11 +1,14 @@
 FROM langchain/langchain
 
-# Recreate sources.list if it doesn't exist
-RUN if [ ! -f /etc/apt/sources.list ]; then echo "deb http://ftp.us.debian.org/debian/ stretch main" > /etc/apt/sources.list; fi
+# Update sources.list to use Bullseye
+RUN echo "deb http://deb.debian.org/debian/ bullseye main" > /etc/apt/sources.list \
+    && echo "deb http://security.debian.org/debian-security bullseye-security main" >> /etc/apt/sources.list \
+    && echo "deb http://deb.debian.org/debian/ bullseye-updates main" >> /etc/apt/sources.list
 
-RUN sed -i 's/deb.debian.org/ftp.us.debian.org/g' /etc/apt/sources.list \
-    && apt-get update \
-    && apt-get install -y build-essential curl software-properties-common \
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
